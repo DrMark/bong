@@ -1,0 +1,12 @@
+== 0.0.2 / ???
+
+* ???
+
+== 0.0.1 / 2007-11-07
+
+* First release. See README.txt for the details.
+
+== TODO
+
+* Compare multiple benchmarking runs and generate a report.
+* Generate Gruff graphs or an HTML report.

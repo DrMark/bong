@@ -1,0 +1,95 @@
+#!/usr/bin/env ruby
+
+##
+# Created on 2007-11-6.
+# Copyright (c) 2007 Topfunky Corporation
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+begin
+  require "rubygems"
+  require "bong"
+rescue LoadError
+  require File.dirname(__FILE__) + "/../lib/bong"
+end
+
+require 'optparse'
+
+OPTIONS = {
+  :config   => 'config/httperf.yml',
+  :generate => 'config/httperf.yml',
+  :out      => "log/httperf-report.yml"
+}
+MANDATORY_OPTIONS = %w(  )
+
+parser = OptionParser.new do |opts|
+  opts.banner = <<-BANNER
+  A benchmarking tool for staging hits on your website. Uses httperf.
+
+  Usage: #{File.basename($0)} [label] [options]
+
+  label is a name for this benchmarking run.
+    Examples: 'baseline', 'with-optimizations', 'custom-sql-queries'
+
+  Other options are:
+  BANNER
+
+  opts.separator ""
+
+  opts.on("-c", "--config [PATH]", String, "Path to config file.", "Default: config/httperf.yml") do |v|
+    OPTIONS[:config] = v || OPTIONS[:config]
+  end
+
+  opts.on("-g", "--generate [PATH]", String, "Generate a config file.", "Default: config/httperf.yml") do |v|
+    Bong.generate(v || OPTIONS[:generate]); exit
+  end
+
+  opts.on("-o", "--out [PATH]", String, "Write output to a file.", "Default: log/httperf-report.yml") do |v|
+    OPTIONS[:out] = v || OPTIONS[:out]
+  end
+
+  opts.on("-r", "--report PATH", String, "Display the report for a data file.") do |v|
+    OPTIONS[:report] = v
+  end
+
+  opts.on("-h", "--help", "Show this help message.") { puts opts; exit }
+
+  opts.parse!(ARGV)
+
+  if MANDATORY_OPTIONS && MANDATORY_OPTIONS.find { |option| OPTIONS[option.to_sym].nil? }
+    puts opts; exit
+  end
+
+  OPTIONS[:label] = ARGV.first || "benchmark-#{Time.now.to_i}"
+
+end
+
+# Finally, run the app.
+
+bong = Bong.new(OPTIONS[:config], OPTIONS[:label])
+
+if OPTIONS[:report]
+  bong.load_report(OPTIONS[:report])
+else
+  bong.run
+  bong.save_report(OPTIONS[:out])
+end
+
+puts bong.report
