@@ -14,7 +14,9 @@ class Bong
     config_data = {
       'servers' => ['localhost:3000'],
       'uris'    => ['/', '/pages/about'],
-      'samples' => 2
+      'samples' => 2,
+      'concurrency' => 1,
+      'cookie' => ''
     }
 
     if File.exist?(config_yml_path)
@@ -154,12 +156,14 @@ class Bong
     end
   end
 
+  # TODO Extract to use AB instead
   def exec_command(server, port, uri, num_conns)
     @logger.info "Sending #{@num_conns} hits to #{server}:#{port}#{uri}"
     cmd = "httperf --server #{server} --port #{port} --uri #{uri} --num-conns #{num_conns}"
     @output = `#{cmd}`
   end
 
+  # TODO Extract to use AB instead
   def parse_results
     stat = {}
 
