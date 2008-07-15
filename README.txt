@@ -75,6 +75,17 @@ See http://peepcode.com/products/benchmarking-with-httperf for a full tutorial o
 
 * sudo gem install bong
 
+== EXPERIMENTAL GRAPHS
+
+After running bong a number of times, provide a visual output with time on the x axis and req/second on the y axis. Intended to show the change in performance throughout the development of a project.
+
+Assumptions
+
+* Each run will be named "benchmark-1216122887" where the second part can be converted to a Time class using Time.at(..)
+* Runs will be displayed at equal intervals along the x axis regardless of if the time between them is uniform
+* Several URLs may be incldued. rps for each one will be of a similar order of magnitude, so it makes sense to graph them together
+* Not all URLs will have data in all runs. However once a url is added it will be in ALL subsequent runs
+
 == LICENSE:
 
 (The MIT License)
