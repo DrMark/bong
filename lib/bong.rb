@@ -1,5 +1,7 @@
 require 'yaml'
 require 'logger'
+require 'gruff'
+
 
 ##
 # A tool for running httperf against a website. Documentation coming soon.
@@ -59,6 +61,45 @@ class Bong
     end
   end
 
+
+  def graph_report(graph_path, report_yml_path)
+    @report = YAML.load(File.read(report_yml_path))
+
+    #remove any with no date
+    @report.reject!{ |name, data| name.split("-").size!=2}
+
+    number_of_times = @report.size
+    
+    inverted_report = { }
+    
+    @report.each do |name, data|
+      report_time = Time.at(name.split("-").last.to_i)
+      date_time = report_time.strftime("%d/%m %H:%M")
+      
+      data.each do |host, urls|
+        urls.each do |url, payload|
+          inverted_report[url] ||= { }
+          inverted_report[url][date_time] = payload['avg'] || nil
+        end
+      end      
+    end
+    
+    inverted_report.each do |url, payload|
+      inverted_report[url][:array] = inverted_report[url].to_a.sort.map{|ele| ele.last}
+      missing_times = number_of_times - inverted_report[url][:array].size
+      inverted_report[url][:array] = Array.new(missing_times) + inverted_report[url][:array]
+    end
+      
+    g = Gruff::Line.new
+    g.title = "Requests per second" 
+
+    inverted_report.each do |url, payload|
+      g.data(url, inverted_report[url][:array])
+    end
+    
+    g.write(graph_path)
+  end
+  
   def load_report(report_yml_path, label=nil)
     @report = YAML.load(File.read(report_yml_path))
     label = label || @label || @report.keys.first

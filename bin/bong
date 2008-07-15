@@ -25,7 +25,9 @@
 
 begin
   require "rubygems"
-  require "bong"
+  require "gruff"
+  require File.dirname(__FILE__) + "/../lib/bong"
+#  require "bong"
 rescue LoadError
   require File.dirname(__FILE__) + "/../lib/bong"
 end
@@ -61,7 +63,7 @@ parser = OptionParser.new do |opts|
     Bong.generate(v || OPTIONS[:generate]); exit
   end
 
-  opts.on("-o", "--out [PATH]", String, "Write output to a file.", "Default: log/httperf-report.yml") do |v|
+  opts.on("-o", "--out [PATH]", String, "Write output to a file.") do |v|
     OPTIONS[:out] = v || OPTIONS[:out]
   end
 
@@ -69,6 +71,10 @@ parser = OptionParser.new do |opts|
     OPTIONS[:report] = v
   end
 
+  opts.on("-t", "--time-report PATH", String, "Create a time graph showing performance over time", "Only works when run in combination with -r") do |v|
+    OPTIONS[:graph] = v
+  end
+  
   opts.on("-h", "--help", "Show this help message.") { puts opts; exit }
 
   opts.parse!(ARGV)
@@ -85,7 +91,10 @@ end
 
 bong = Bong.new(OPTIONS[:config], OPTIONS[:label])
 
-if OPTIONS[:report]
+if OPTIONS[:graph] && OPTIONS[:report]
+  bong.graph_report(OPTIONS[:graph], OPTIONS[:report])
+  exit
+elsif OPTIONS[:report]
   bong.load_report(OPTIONS[:report])
 else
   bong.run
