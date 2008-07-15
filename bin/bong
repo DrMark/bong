@@ -25,9 +25,7 @@
 
 begin
   require "rubygems"
-  require "gruff"
   require File.dirname(__FILE__) + "/../lib/bong"
-#  require "bong"
 rescue LoadError
   require File.dirname(__FILE__) + "/../lib/bong"
 end

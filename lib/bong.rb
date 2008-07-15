@@ -1,7 +1,5 @@
 require 'yaml'
 require 'logger'
-require 'gruff'
-
 
 ##
 # A tool for running httperf against a website. Documentation coming soon.
@@ -63,10 +61,13 @@ class Bong
 
 
   def graph_report(graph_path, report_yml_path)
+    # Require gruff here so people can run the rest of the app without gruff.
+    require 'gruff'
+    
     @report = YAML.load(File.read(report_yml_path))
 
-    #remove any with no date
-    @report.reject!{ |name, data| name.split("-").size!=2}
+    # Remove any with no date
+    @report.reject! { |name, data| name.split("-").size != 2 }
 
     number_of_times = @report.size
     
