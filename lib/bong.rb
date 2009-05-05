@@ -154,9 +154,14 @@ class Bong
     end
   end
 
-  def exec_command(server, port, uri, num_conns)
-    @logger.info "Sending #{@num_conns} hits to #{server}:#{port}#{uri}"
-    cmd = "httperf --server #{server} --port #{port} --uri #{uri} --num-conns #{num_conns}"
+  def exec_command(server, port, uri, num_conns, num_calls=1, burst_length=1, rate=0, hog=true)
+    num_calls = num_calls.to_i
+    @logger.info "Sending #{@num_conns} hits to #{server}:#{port.to_i}#{uri}"
+    cmd = "httperf --server #{server} --port #{port} --uri #{uri} --num-conns #{num_conns.to_i}"
+    cmd += " --num-calls #{num_calls}" if num_calls > 0
+    cmd += " --burst-length #{burst_length}" if burst_length > 0
+    cmd += " --rate #{rate}" if rate > 0
+    cmd += " --hog" if hog
     @output = `#{cmd}`
   end
 
